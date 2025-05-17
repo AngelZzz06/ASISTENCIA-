@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: url('images/UNFV.jpg') no-repeat center center fixed;
+      background: url('images/nunuespacial.jpeg') no-repeat center center fixed;
       background-size: cover;
       position: relative;
     }
@@ -48,7 +48,7 @@
     }
 
     .logo-fiei {
-      height: 120px;
+      height: 100px;
       border-radius: 5px;
       margin-left: auto;
     }
@@ -165,22 +165,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
-  // ✅ Fecha y hora actual
-  const hoy = new Date();
-  const fechaHoy = hoy.toISOString().split('T')[0]; // YYYY-MM-DD
-  const horaActual = hoy.toTimeString().split(' ')[0]; // HH:MM:SS
-
-  // ✅ Al cargar la página
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("fecha").value = fechaHoy;
-  });
-
   const alumnos = {
     "2024020374": "Luis Angel Cotacallapa",
-    "2024034625": "Jesus Abel Huaricancha",
+    "2024034625": "Jesus Abel Huaricancha"
   };
 
   let codigoActual = "";
+
+  function setFechaHoy() {
+    const hoy = new Date();
+    const fechaHoy = hoy.toISOString().split('T')[0];
+    const inputFecha = document.getElementById("fecha");
+    if (inputFecha) inputFecha.value = fechaHoy;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setFechaHoy);
+  } else {
+    setFechaHoy();
+  }
 
   function iniciarSesion() {
     const codigo = document.getElementById("codigo").value.trim();
@@ -192,17 +195,22 @@
       document.getElementById("saludoAlumno").textContent = "Bienvenido, " + alumnos[codigo];
       document.getElementById("inicio").classList.add("oculto");
       document.getElementById("panelAlumno").classList.remove("oculto");
+      setFechaHoy();
     } else {
       error.textContent = "Código incorrecto.";
     }
   }
 
   function guardarAsistencia(estado) {
+    const hoy = new Date();
+    const fecha = hoy.toISOString().split('T')[0];
+    const hora = hoy.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
-    if (!datos[fechaHoy]) datos[fechaHoy] = {};
-    datos[fechaHoy][codigoActual] = `${estado} a las ${horaActual}`;
+    if (!datos[fecha]) datos[fecha] = {};
+    datos[fecha][codigoActual] = estado + " - " + hora;
     localStorage.setItem("asistencia", JSON.stringify(datos));
-    alert(`Asistencia registrada como: ${estado} a las ${horaActual}`);
+    alert("Asistencia registrada: " + estado);
     location.reload();
   }
 
