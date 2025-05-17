@@ -48,7 +48,7 @@
     }
 
     .logo-fiei {
-      height: 90px;
+      height: 120px;
       border-radius: 5px;
       margin-left: auto;
     }
@@ -165,13 +165,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
+  // ✅ Fecha y hora actual
+  const hoy = new Date();
+  const fechaHoy = hoy.toISOString().split('T')[0]; // YYYY-MM-DD
+  const horaActual = hoy.toTimeString().split(' ')[0]; // HH:MM:SS
+
+  // ✅ Al cargar la página
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("fecha").value = fechaHoy;
+  });
+
   const alumnos = {
     "2024020374": "Luis Angel Cotacallapa",
     "2024034625": "Jesus Abel Huaricancha",
   };
 
   let codigoActual = "";
-    document.getElementById("fecha").value = fechaHoy;
 
   function iniciarSesion() {
     const codigo = document.getElementById("codigo").value.trim();
@@ -191,9 +200,9 @@
   function guardarAsistencia(estado) {
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     if (!datos[fechaHoy]) datos[fechaHoy] = {};
-    datos[fechaHoy][codigoActual] = estado;
+    datos[fechaHoy][codigoActual] = `${estado} a las ${horaActual}`;
     localStorage.setItem("asistencia", JSON.stringify(datos));
-    alert("Asistencia registrada como: " + estado);
+    alert(`Asistencia registrada como: ${estado} a las ${horaActual}`);
     location.reload();
   }
 
