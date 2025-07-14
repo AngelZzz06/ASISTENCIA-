@@ -126,8 +126,7 @@
   </h2>
 
   <div style="display: flex; align-items: center; gap: 20px;">
-    <!-- Imagen QR a la izquierda -->
-    <img src="images/QR pagina.png" alt="Código QR" style="width: 100px; height: 100px; border-radius: 10px;" />
+    <img src="images/QR_pagina.png" alt="Código QR" style="width: 100px; height: 100px; border-radius: 10px;" />
     
     <div style="flex: 1;">
       <label for="codigo">Código único:</label>
@@ -180,7 +179,6 @@
 
   let codigoActual = "";
 
-  // Obtener la fecha actual en formato YYYY-MM-DD
   const fechaHoy = new Date().toISOString().split("T")[0];
   document.getElementById("fecha").value = fechaHoy;
 
@@ -202,9 +200,16 @@
   function guardarAsistencia(estado) {
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     if (!datos[fechaHoy]) datos[fechaHoy] = {};
-    datos[fechaHoy][codigoActual] = estado;
+
+    const horaActual = new Date().toLocaleTimeString();
+
+    datos[fechaHoy][codigoActual] = {
+      estado: estado,
+      hora: horaActual
+    };
+
     localStorage.setItem("asistencia", JSON.stringify(datos));
-    alert("Asistencia registrada como: " + estado);
+    alert("Asistencia registrada como: " + estado + " a las " + horaActual);
     location.reload();
   }
 
@@ -217,6 +222,7 @@
     const clave = document.getElementById("claveProfesor").value.trim();
     const error = document.getElementById("errorProfesor");
     error.textContent = "";
+
     if (clave === "admin123") {
       document.getElementById("loginProfesor").classList.add("oculto");
       document.getElementById("panelProfesor").classList.remove("oculto");
@@ -230,20 +236,27 @@
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     const alumnosLista = Object.entries(alumnos);
     let html = `<table><thead><tr><th>Fecha</th>`;
+
     alumnosLista.forEach(([codigo, nombre]) => {
       html += `<th>${nombre}</th>`;
     });
+
     html += `</tr></thead><tbody>`;
 
     const fechas = Object.keys(datos).sort();
     fechas.forEach(fecha => {
       html += `<tr><td>${fecha}</td>`;
       alumnosLista.forEach(([codigo]) => {
-        const estado = datos[fecha][codigo] || "-";
-        html += `<td>${estado}</td>`;
+        const registro = datos[fecha][codigo];
+        if (registro) {
+          html += `<td>${registro.estado}<br><small>${registro.hora}</small></td>`;
+        } else {
+          html += `<td>-</td>`;
+        }
       });
       html += `</tr>`;
     });
+
     html += `</tbody></table>`;
     document.getElementById("tablaAsistencia").innerHTML = html;
   }
@@ -256,7 +269,12 @@
     Object.keys(datos).sort().forEach(fecha => {
       const fila = [fecha];
       alumnosLista.forEach(([codigo]) => {
-        fila.push(datos[fecha][codigo] || "-");
+        const registro = datos[fecha][codigo];
+        if (registro) {
+          fila.push(`${registro.estado} (${registro.hora})`);
+        } else {
+          fila.push("-");
+        }
       });
       hoja.push(fila);
     });
