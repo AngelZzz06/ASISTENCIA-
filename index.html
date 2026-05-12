@@ -57,7 +57,7 @@
       font-weight: bold;
       display: block;
       margin: 10px 0 5px;
-      color: white;
+      color: rgb(243, 159, 90);
     }
 
     input[type="password"], input[type="date"] {
@@ -70,7 +70,7 @@
     }
 
     button {
-      background-color: #2563eb;
+      background-color: #ff5100;
       color: white;
       padding: 10px;
       border: none;
@@ -81,11 +81,11 @@
     }
 
     button:hover {
-      background-color: #1d4ed8;
+      background-color: #b93c166e;
     }
 
     .error {
-      color: yellow;
+      color: rgb(204, 9, 9);
       font-weight: bold;
     }
 
@@ -97,23 +97,23 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
-      background: white;
-      color: black;
+      background: rgb(255, 255, 255);
+      color: rgb(83, 35, 35);
     }
 
     th, td {
-      border: 1px solid #cbd5e1;
-      padding: 8px;
+      border: 1px solid #ffbefc42;
+      padding: 12px;
       text-align: center;
     }
 
     th {
-      background-color: #e0e7ff;
+      background-color: #ecc3ca;
     }
 
     .presente {
       background-color: #34d399;
-      color: white;
+      color: rgb(235, 195, 195);
     }
   </style>
 </head>
@@ -147,7 +147,7 @@
   <label>Fecha de hoy:</label>
   <input type="date" id="fecha" readonly />
   <p>Marca tu asistencia:</p>
-  <button class="presente" onclick="guardarAsistencia('Presente')">✔ Presente</button>
+  <button class="presente" onclick="guardarAsistencia('Presente')"> Presente</button>
 </div>
 
 <div class="contenedor oculto" id="loginProfesor">
@@ -156,7 +156,7 @@
     <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
   </h2>
   <label for="claveProfesor">Clave:</label>
-  <input type="password" id="claveProfesor" placeholder="admin123" />
+  <input type="password" id="claveProfesor" placeholder="soyprofe" />
   <button onclick="accederComoProfesor()">Entrar</button>
   <div class="error" id="errorProfesor"></div>
 </div>
@@ -166,7 +166,7 @@
     <span>Panel del Profesor</span>
     <img src="images/FIEI.jpg" class="logo-fiei" alt="Logo FIEI" />
   </h2>
-  <button onclick="exportarExcel()">📁 Exportar a Excel</button>
+  <button onclick="exportarExcel()">Exportar a Excel</button>
   <div id="tablaAsistencia"></div>
 </div>
 
@@ -174,12 +174,16 @@
 
 <script>
   const alumnos = {
-    "2024020374": "Luis Angel Cotacallapa",
+    "2024020374": "Luis Angel Cotacallapa Velasquez",
     "2024034625": "Jesus Abel Huaricancha",
+    "2025020374": "Crispin Crispin Jeremy",
+    "2024111111": "Tolentino Renan Pablo",
+    "2024222222": "Linares Salvatierra Marco",
   };
 
   let codigoActual = "";
 
+  // Obtener la fecha actual en formato
   const fechaHoy = new Date().toISOString().split("T")[0];
   document.getElementById("fecha").value = fechaHoy;
 
@@ -201,16 +205,9 @@
   function guardarAsistencia(estado) {
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     if (!datos[fechaHoy]) datos[fechaHoy] = {};
-
-    const horaActual = new Date().toLocaleTimeString();
-
-    datos[fechaHoy][codigoActual] = {
-      estado: estado,
-      hora: horaActual
-    };
-
+    datos[fechaHoy][codigoActual] = estado;
     localStorage.setItem("asistencia", JSON.stringify(datos));
-    alert("Asistencia registrada como: " + estado + " a las " + horaActual);
+    alert("Asistencia registrada como: " + estado);
     location.reload();
   }
 
@@ -223,8 +220,7 @@
     const clave = document.getElementById("claveProfesor").value.trim();
     const error = document.getElementById("errorProfesor");
     error.textContent = "";
-
-    if (clave === "admin123") {
+    if (clave === "soyprofe") {
       document.getElementById("loginProfesor").classList.add("oculto");
       document.getElementById("panelProfesor").classList.remove("oculto");
       mostrarTabla();
@@ -237,31 +233,24 @@
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     const alumnosLista = Object.entries(alumnos);
     let html = `<table><thead><tr><th>Fecha</th>`;
-
     alumnosLista.forEach(([codigo, nombre]) => {
       html += `<th>${nombre}</th>`;
     });
-
     html += `</tr></thead><tbody>`;
 
     const fechas = Object.keys(datos).sort();
     fechas.forEach(fecha => {
       html += `<tr><td>${fecha}</td>`;
       alumnosLista.forEach(([codigo]) => {
-        const registro = datos[fecha][codigo];
-        if (registro) {
-          html += `<td>${registro.estado}<br><small>${registro.hora}</small></td>`;
-        } else {
-          html += `<td>-</td>`;
-        }
+        const estado = datos[fecha][codigo] || "-";
+        html += `<td>${estado}</td>`;
       });
       html += `</tr>`;
     });
-
     html += `</tbody></table>`;
     document.getElementById("tablaAsistencia").innerHTML = html;
   }
-
+//exportar en excel
   function exportarExcel() {
     const datos = JSON.parse(localStorage.getItem("asistencia")) || {};
     const alumnosLista = Object.entries(alumnos);
@@ -270,12 +259,7 @@
     Object.keys(datos).sort().forEach(fecha => {
       const fila = [fecha];
       alumnosLista.forEach(([codigo]) => {
-        const registro = datos[fecha][codigo];
-        if (registro) {
-          fila.push(`${registro.estado} (${registro.hora})`);
-        } else {
-          fila.push("-");
-        }
+        fila.push(datos[fecha][codigo] || "-");
       });
       hoja.push(fila);
     });
